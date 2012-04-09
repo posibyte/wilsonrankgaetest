@@ -1,5 +1,6 @@
 from google.appengine.ext import ndb
-import rank, logging
+from src import rank
+import logging
 
 class Post(ndb.Model):
     title = ndb.StringProperty()

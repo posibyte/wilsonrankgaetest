@@ -9,12 +9,11 @@
 import webapp2
 import logging, json
 from datetime import datetime
-import rank
+from src import rank, config
 from webapp2_extras import jinja2, sessions
-from entities import post as post1
-from jinja2_factory import jinja2_factory
+from src.entities import post as post1
+from src.jinja2_factory import jinja2_factory
 import random
-import config
 
 class BaseHandler(webapp2.RequestHandler):
 

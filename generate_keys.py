@@ -48,6 +48,7 @@ def generate_randomkey(length):
 
 
 def write_file(contents):
+    os.chdir("src")
     f = open(file_name, 'wb')
     f.write(contents)
     f.close()
