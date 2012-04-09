@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Rankings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link href="/css/bootstrap.css" rel="stylesheet">
+    <style>
+      body {
+        padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
+      }
+    </style>
+    <link href="/css/bootstrap-responsive.css" rel="stylesheet">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/ico/favicon.ico">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="/ico/apple-touch-icon-114-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="/ico/apple-touch-icon-72-precomposed.png">
+    <link rel="apple-touch-icon-precomposed" href="/ico/apple-touch-icon-57-precomposed.png">
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">Rank</a>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+        {% if flash %}
+        <div class="alert {{ status }} fade in">
+            <a class="close" data-dismiss="alert">&times;</a>
+            {{ flash|safe }}
+        </div>
+        {% endif %}
+        <div id="alert" style="display: none;" class="alert alert-error fade in">
+            <a class="close" style="margin-top: 3px">&times;</a>
+        </div>
+        <div class="row">
+            <div class="span6">
+                <form name="submission" action="/post" method="post" class="well form-inline form-horizontal">
+                <fieldset>
+                  <input type="text" name="title" placeholder="Title" />
+                  <input type="text" name="description" placeholder="Description" />
+                  <button type="submit" class="btn btn-primary">Submit</button>
+                </fieldset>
+                </form>
+            </div>
+            
+            <div class=" offset2 span4">
+                <form name="submission" action="/login" method="post" class="well form-inline form-horizontal">
+                <fieldset>
+                  <input type="text" name="Login" placeholder="Please enter a correct password" />
+                  <button type="submit" class="btn btn-primary">Login</button>
+                </fieldset>
+                </form>
+            </div>
+        </div>
+    
+      <table id="posts" class="table well table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Position</th>
+                <th>Title</th>
+                <th>Upvotes</th>
+                <th>Downvotes</th>
+                <th>"Score"</th>
+                <th>Description</th>
+                <th>Posted?</th>
+                <th>Calculated Score</th>
+                <th>Delete?</th>
+            </tr>
+        </thead>
+        <tbody>
+          {% for item in list %}
+            <tr>
+              <td style="text-align: center;">{{ loop.index }}</td>
+              <td style="text-align: center">{{ item.title }}</td>
+              <td style="text-align: center"><div title="Upvote!" data-loading-text="..." data-content="Adds a positive vote to the score for this entity." data-action="upvote" type="submit" class="btn btn-mini btn-success" data-key="{{ item.key.urlsafe() }}">{{ item.upvotes }}</div></td>
+              <td style="text-align: center"><div title="Downvote :(" data-loading-text="..." data-content="Adds a negative vote to the score for this entity." data-action="downvote" type="submit" class="btn btn-mini btn-danger" data-key="{{ item.key.urlsafe() }}">{{ item.downvotes }}</div></td>
+              <td style="text-align: center">{{ item.upvotes - item.downvotes }}</td>
+              <td style="text-align: center">{{ item.description }}</td>
+              <td style="text-align: center">{{ item.date_posted|datetimeformat('%A %m-%d-%Y at %H:%M %p') }}</td>
+              <td style="text-align: center" class="score"><span style="color: {% if item.score > 0 %}#5BB75B{% else %}#BD362F{% endif %}">{{ item.score }}</span></td>
+              <td style="text-align: center"><div title="EXPLODE" data-content="If authorized, deletes the entity row." data-loading-text="..." data-action="delete" type="submit" class="btn btn-mini btn-warning" data-key="{{ item.key.urlsafe() }}">BOOM!</div></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+    </div> <!-- /container -->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script src="/js/jquery.tinysort.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#alert > .close").click( function () { $(this).parent().slideUp(300); } );
+            $('td > div').popover({ placement : 'left', delay : { show: 500, hide: 100 }});
+            $().alert()
+            $("td div.btn").click(function() {
+                self = this;
+                $(self).button('loading');
+                if(self.getAttribute("data-action") == 'upvote' || self.getAttribute("data-action") == 'downvote')
+                   $.ajax({url : '/vote',
+                          type : 'POST',
+                          data : { 'value' : self.getAttribute("data-key"), 'action' : self.getAttribute("data-action") },
+                          dataType : 'JSON',
+                          success : function(data) { $(self).button('reset');
+                                                     $(self).html(data.count);
+                                                     $(self).parent().siblings('.score').children('span').html(data.score);
+                                                     $('#posts>tbody>tr').tsort('td.score > span', {order : 'desc'});
+                                                     $('#posts>tbody>tr>td.score>span').each(function() {
+                                                        if($(this).text() > 0)
+                                                            $(this).css('color', '#5BB75B');
+                                                        else
+                                                            $(this).css('color', '#DA4F49');
+                                                     });
+                                                   },
+                    });
+                else
+                if(self.getAttribute("data-action") == 'delete')
+                    $.ajax({url : '/delete',
+                            type : 'POST',
+                            data : { 'key' : self.getAttribute("data-key") },
+                            dataType : 'JSON',
+                            success : function() { $(self).parent().parent().remove() },
+                            error: function() { $(self).button('reset'); $("#alert").html("<strong>You are not authorized to delete this entity.</strong>");
+                                                $("#alert").slideDown(300).delay(3000).slideUp(300); }
+                    });
+                    
+                
+            });
+        });
+    </script>
+
+  </body>
+</html>

@@ -1,0 +1,19 @@
+# Compiled sources #
+####################
+*.pyc
+
+# Secret sauce files #
+######################
+secret_keys.py
+
+
+# Logs #
+########
+*.log
+
+# OS Stuff #
+############
+.DS_Store* # Mac OS X
+ethumbs.db # Windows preview files
+Icon?
+Thumbs.db # Windows thumbnail cache
