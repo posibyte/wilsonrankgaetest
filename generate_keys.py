@@ -13,8 +13,6 @@ Outputs secret_keys.py file in current folder
 By default, an existing secret_keys file will not be replaced.
 Use the '-f' flag to force the new keys to be written to the file
 
-TODO: Check what license this is under
-
 """
 
 import string
